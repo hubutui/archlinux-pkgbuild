@@ -1,0 +1,77 @@
+# Maintainer: Bert Peters <bert@bertptrs.nl>
+# Maintainer: wedjat <wedjat@protonmail.com>
+# Darcy Hu <hot123tea123@gmail.com>
+# Contributor: Andrzej Giniewicz <gginiu@gmail.com>
+_pkgname=pydicom
+pkgbase=python-pydicom
+pkgname=('python-pydicom' 'python2-pydicom')
+pkgver=1.1.0
+pkgrel=1
+pkgdesc="Pure python package for working with DICOM files"
+arch=("any")
+url="https://github.com/pydicom/pydicom"
+license=('MIT')
+makedepends=('python-setuptools' 'python2-setuptools')
+checkdepends=('python-pytest-runner' 'python2-pytest-runner')
+source=("$_pkgname-$pkgver.tar.gz::https://github.com/pydicom/pydicom/archive/v$pkgver.tar.gz")
+md5sums=('759799fbe1d01d1daadeca649717122b')
+prepare() 
+{
+	cp -a "$srcdir/$_pkgname-$pkgver" "$srcdir/$_pkgname-$pkgver-py2"
+
+	cd "$srcdir/$_pkgname-$pkgver"
+	sed -i -e "s|#![ ]*/usr/bin/python$|#!/usr/bin/python|"  $(find -name '*.py')
+}
+
+build() 
+{
+	cd "$srcdir/pydicom-$pkgver"
+	python setup.py build
+
+	cd "$srcdir/pydicom-$pkgver-py2"
+	python2 setup.py build
+}
+
+#check()
+#{
+#	cd "$srcdir/$_pkgname-$pkgver"
+#	python setup.py pytest
+#
+#	cd "$srcdir/$_pkgname-$pkgver-py2"
+#	python2 setup.py pytest
+#}
+
+package_python-pydicom() 
+{
+	depends=(
+    'python'
+    'python-numpy')
+	optdepends=(
+    'python-numpy: Manipulating pixel data'
+	  'python-pillow: Image support'
+	  'gdcm: DICOM support'
+	  'openjpeg2: JPEG 2000 support')
+
+	cd "$srcdir/pydicom-$pkgver"
+	python setup.py install --root="$pkgdir" --optimize=1
+
+  install -D "$srcdir/pydicom-$pkgver/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
+package_python2-pydicom() 
+{
+	depends=('python2')
+	optdepends=('python2-numpy: Manipulating pixel data'
+	  'python2-pillow: Image support'
+	  'gdcm: DICOM support'
+	  'charls: JPEG-LS support'
+	  'openjpeg2: JPEG 2000 support')
+
+	cd "$srcdir/pydicom-$pkgver-py2"
+	python2 setup.py install --root="$pkgdir" --optimize=1
+
+  install -D "$srcdir/pydicom-$pkgver-py2/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
+# vim:set ts=2 sw=2 et:
+
